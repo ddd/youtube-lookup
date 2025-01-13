@@ -414,6 +414,7 @@
             width: 100%;
             height: 200px;
             object-fit: cover;
+            border-radius: 0.5rem;
         }
 
         .channel-description {
@@ -630,22 +631,58 @@
 
 
         const VerificationBadge = ({ type }) => {
-            if (!type || type === "none") return null;
-
+            // Common styling for all badges
             const badgeStyle = {
                 transform: 'translateY(1px)',
-                marginLeft: '-4px'  // Now both badges have same left margin
+                marginLeft: '-4px'
             };
 
+            // If type is undefined (not null or "none"), show warning badge
+            if (type === undefined) {
+                return (
+                    <div 
+                        className="flex items-center" 
+                        style={badgeStyle} 
+                        title="Channel verification status and handle caps could not be fetched"
+                    >
+                        <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            viewBox="0 0 24 24" 
+                            width="14"
+                            height="14"
+                            fill="none"
+                            stroke="#FCD34D"
+                            strokeWidth="2"
+                        >
+                            <circle cx="12" cy="12" r="10" />
+                            <path 
+                                d="M12 8v4m0 4h.01" 
+                                stroke="#FCD34D" 
+                                strokeWidth="2" 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round"
+                            />
+                        </svg>
+                    </div>
+                );
+            }
+
+            // Return null for explicit null or "none" type
+            if (!type || type === "none") return null;
+
             return (
-                <div className="flex items-center" style={badgeStyle} title={type === "oac" ? "Official Artist Channel" : "Verified"}>
+                <div 
+                    className="flex items-center" 
+                    style={badgeStyle} 
+                    title={type === "oac" ? "Official Artist Channel" : "Verified"}
+                >
                     {type === "oac" ? (
                         <svg 
                             xmlns="http://www.w3.org/2000/svg" 
                             viewBox="0 0 12 12" 
-                            width="14"    // Made smaller
-                            height="14"   // Made smaller
-                            fill="white"  // Changed to white
+                            width="14"
+                            height="14"
+                            fill="white"
                         >
                             <g>
                                 <path 
@@ -659,9 +696,9 @@
                         <svg 
                             xmlns="http://www.w3.org/2000/svg" 
                             viewBox="0 0 24 24" 
-                            width="14"    // Made smaller
-                            height="14"   // Made smaller
-                            fill="white"  // Changed to white
+                            width="14"
+                            height="14"
+                            fill="white"
                         >
                             <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zM9.8 17.3l-4.2-4.1L7 11.8l2.8 2.7L17 7.4l1.4 1.4-8.6 8.5z" />
                         </svg>
@@ -726,7 +763,7 @@
                                     <h2 className="channel-name">{channel.display_name}</h2>
                                     <VerificationBadge type={channel.verification?.toLowerCase()} />
                                     {isSynced && (
-                                        <span className="sync-badge" title="Channel is synced">
+                                        <span className="sync-badge" title="Channel name and profile picture is synced with it's Google account">
                                         Synced
                                         </span>
                                     )}
