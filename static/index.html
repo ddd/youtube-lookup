@@ -737,7 +737,20 @@
                 const date = new Date(timestamp * 1000);
                 return `${String(date.getUTCDate()).padStart(2, '0')}/${String(date.getUTCMonth() + 1).padStart(2, '0')}/${date.getUTCFullYear()} ${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}:${String(date.getUTCSeconds()).padStart(2, '0')}`;
             };
-            
+
+            const formatViewCount = (count) => {
+                if (count >= 1000000000) {
+                    const billions = count / 1000000000;
+                    return `${billions.toFixed(1).replace(/\.0$/, '')}B`;
+                } else if (count >= 1000000) {
+                    return `${Math.floor(count / 1000000)}M`;
+                } else if (count >= 1000) {
+                    const thousands = count / 1000;
+                    return `${thousands.toFixed(1).replace(/\.0$/, '')}K`;
+                }
+                return count.toLocaleString();
+            };
+
             return (
                 <div className="card">
                     <div className="channel-header">
@@ -792,7 +805,7 @@
                                 <div className="channel-stats">
                                     <span>{formatSubscriberCount(channel.subscriber_count)} subscribers</span>
                                     <span>{channel.video_count.toLocaleString()} videos</span>
-                                    <span>{channel.view_count.toLocaleString()} views</span>
+                                    <span>{formatViewCount(channel.view_count)} views</span>
                                 </div>
                             </div>
                         </div>

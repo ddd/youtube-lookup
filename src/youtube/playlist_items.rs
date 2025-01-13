@@ -124,6 +124,10 @@ pub async fn get_playlist_items(
                 title,
                 description,
                 created_at: timestamp,
+                livestream: false,
+                views: None,
+                likes: None,
+                comments: None
             })
         })
         .collect();

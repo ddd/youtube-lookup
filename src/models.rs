@@ -39,6 +39,10 @@ pub struct Video {
     pub video_id: String,
     pub title: String,
     pub description: String,
+    pub livestream: bool,
+    pub views: Option<i64>,
+    pub likes: Option<i64>,
+    pub comments: Option<i64>,
     pub created_at: i64,
 }
 
