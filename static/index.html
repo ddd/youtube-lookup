@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Channel Lookup</title>
+    
+    <!-- React and ReactDOM -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/inter-ui/3.19.3/inter.css" />
+    <style>
+        
+        /* Icon styles */
+        .icon-button {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            padding: 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: color 0.2s;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .icon-button:hover {
+            color: #e2e8f0;
+            background: #334155;
+        }
+
+        .meta-with-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Base styles */
+        body {
+            background-color: #0f0f0f;
+            margin: 0;
+            padding: 0;
+            font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: #ffffff;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Card styles */
+        .card {
+            background: #181818;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            margin-bottom: 1rem;
+            padding: 1.5rem;
+            border: 1px solid #303030;
+        }
+
+        /* Form styles */
+        .lookup-form {
+            display: flex;
+            gap: 1px;
+            background-color: #303030;
+            padding: 1px;
+            border-radius: 6px;
+        }
+
+        select, input {
+            font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 0.75rem 1rem;
+            border: none;
+            background-color: #121212;
+            color: #ffffff;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+
+        select:hover, input:hover {
+            background-color: #1a1a1a;
+        }
+
+        select {
+            border-radius: 5px 0 0 5px;
+            width: 160px;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 35px;
+        }
+
+        input {
+            flex: 1;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            background-color: #1a1a1a;
+        }
+
+        select option {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 8px;
+        }
+
+        input::placeholder {
+            color: #94a3b8;
+        }
+
+        /* Special style for the lookup button */
+        button.lookup-button {
+            background-color: #121212;
+            color: #aaaaaa;
+            border: none;
+            cursor: pointer;
+            padding: 0 1.25rem;
+            border-radius: 0 5px 5px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        button.lookup-button:hover:not(:disabled) {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        button.lookup-button:disabled {
+            background-color: #121212;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        button {
+            background-color: #222222;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background-color: #303030;
+        }
+
+        button:disabled {
+            background-color: #475569;
+            cursor: not-allowed;
+        }
+
+        /* Tab styles */
+        .tabs {
+            margin-top: 1rem;
+        }
+
+        .tab-list {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            color: #aaaaaa;
+            margin-right: 1rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-family: "Roboto", sans-serif;
+            font-size: 0.875rem;
+            font-weight: 500;
+            letter-spacing: normal;
+            text-transform: none;
+        }
+
+        .tab-button.active {
+            color: #ffffff;
+            border-bottom: 2px solid #ffffff;
+        }
+
+        /* Video grid and card styles */
+        .videos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .video-card {
+            padding: 0;
+            overflow: hidden;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+
+        .video-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+        }
+
+        .video-info {
+            padding: 1rem;
+        }
+
+        .video-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin: 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-date {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 0.5rem;
+        }
+
+        /* Subscription grid and card styles */
+        .subscriptions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .subscription-card {
+            padding: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .subscription-image {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+        }
+
+        .subscription-info {
+            min-width: 0;
+        }
+
+        .subscription-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .subscription-date {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin: 0;
+            margin-top: 0.25rem;
+        }
+
+        /* Loading spinner */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #1a73e8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Error message */
+        .error {
+            color: #d32f2f;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Component-specific styles */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .profile-image {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .channel-header {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .channel-id {
+            position: absolute;
+            top: 0;
+            right: 0;
+            font-family: "Roboto", "Arial", sans-serif;
+            font-size: 0.875rem;
+            color: #f1f1f1;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.1s;
+            white-space: nowrap;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .channel-id:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .channel-id::after {
+            content: "";
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='13' height='13' rx='2' ry='2'%3E%3C/rect%3E%3Cpath d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'%3E%3C/path%3E%3C/svg%3E");
+            opacity: 0.6;
+        }
+
+        .channel-id:active {
+            transform: scale(0.98);
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        .redirect-url {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            border-top: 1px solid #334155;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            word-break: break-all;
+        }
+
+        .channel-main {
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .channel-titles {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .channel-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .channel-meta {
+            display: flex;
+            gap: 1rem;
+            color: #94a3b8;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .channel-handle {
+            color: #60a5fa;
+        }
+
+        .channel-stats {
+            display: flex;
+            gap: 1.5rem;
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            margin-top: 0.75rem;
+        }
+
+        .channel-banner {
+            margin-top: 1rem;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .channel-banner img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .channel-description {
+            white-space: pre-wrap;
+            color: #cbd5e1;
+            font-size: 0.925rem;
+            line-height: 1.5;
+        }
+
+        .channel-metadata {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 1.25rem;
+            border-radius: 12px;
+        }
+
+        .metadata-item {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            padding: 0.25rem 0;
+        }
+
+        .metadata-label {
+            color: #aaa;
+            font-size: 0.875rem;
+            font-family: "Roboto", "Arial", sans-serif;
+            min-width: 140px;
+            font-weight: 500;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .metadata-label::after {
+            content: ":";
+            position: absolute;
+            right: -0.5rem;
+            color: #666;
+        }
+
+        .metadata-value {
+            color: #f1f1f1;
+            font-size: 0.875rem;
+            font-family: "Roboto", "Arial", sans-serif;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 400;
+            transition: background-color 0.1s;
+        }
+
+        .metadata-value:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Add icons for each metadata type */
+        .metadata-label[data-type]::before {
+            content: "";
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            opacity: 0.7;
+        }
+
+        .metadata-label[data-type="kids"]::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z'%3E%3C/path%3E%3Cpath d='M19 9h-4'%3E%3C/path%3E%3Cpath d='M5 9h4'%3E%3C/path%3E%3Cpath d='M12 19c-2.3 0-4.3-1.9-4.3-4.3V9'%3E%3C/path%3E%3Cpath d='M16.3 9v5.7c0 2.4-2 4.3-4.3 4.3'%3E%3C/path%3E%3C/svg%3E");
+        }
+
+        .metadata-label[data-type="analytics"]::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 3v18h18'/%3E%3Cpath d='m19 9-5 5-4-4-3 3'/%3E%3C/svg%3E");
+        }
+
+        .metadata-label[data-type="noindex"]::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='4.93' y1='4.93' x2='19.07' y2='19.07'%3E%3C/line%3E%3C/svg%3E");
+        }
+
+        .metadata-label[data-type="blocked"]::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2' ry='2'%3E%3C/rect%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'%3E%3C/path%3E%3C/svg%3E");
+        }
+
+        .metadata-label[data-type="redirect"]::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 3h6v6'/%3E%3Cpath d='M10 14L21 3'/%3E%3Cpath d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'/%3E%3C/svg%3E");
+        }
+
+        .metadata-label[data-type="url"]::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'%3E%3C/path%3E%3Cpath d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'%3E%3C/path%3E%3C/svg%3E");
+        }
+
+        .channel-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .channel-tag {
+            background: rgba(255, 255, 255, 0.08);
+            color: #f1f1f1;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-family: "Roboto", "Arial", sans-serif;
+            transition: background-color 0.1s;
+            font-weight: 400;
+            line-height: 1.2;
+        }
+
+        .channel-tag:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .subscription-card {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .subscription-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .name-and-sync {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .sync-badge {
+            background-color: #334155;
+            color: #94a3b8;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 400;
+        }
+
+        .image-loading {
+            position: relative;
+            background: #334155;
+            overflow: hidden;
+        }
+
+        .image-loading::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            transform: translateX(-100%);
+            background-image: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0,
+                rgba(255, 255, 255, 0.1) 20%,
+                rgba(255, 255, 255, 0.2) 60%,
+                rgba(255, 255, 255, 0)
+            );
+            animation: shimmer 2s infinite;
+        }
+
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            padding: 2rem;
+            margin-top: 1rem;
+        }
+
+        @keyframes shimmer {
+            100% {
+                transform: translateX(100%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // React component
+        const { useState } = React;
+
+        const formatSubscriberCount = (count) => {
+            if (count >= 1000000000) {
+                const billions = count / 1000000000;
+                // Only show decimal if it's not a whole number
+                return `${billions % 1 === 0 ? Math.floor(billions) : billions.toFixed(1)}B`;
+            } else if (count >= 1000000) {
+                const millions = count / 1000000;
+                // Show up to 2 decimal places, but only if necessary
+                if (millions % 1 === 0) {
+                    return `${Math.floor(millions)}M`;
+                }
+                // Remove trailing zeros but keep significant decimals
+                return `${millions.toFixed(2).replace(/\.?0+$/, '')}M`;
+            } else if (count >= 1000) {
+                const thousands = count / 1000;
+                // Only show decimal if it's not a whole number
+                return `${thousands % 1 === 0 ? Math.floor(thousands) : thousands.toFixed(1)}K`;
+            }
+            return count.toLocaleString();
+        };
+
+
+        const VerificationBadge = ({ type }) => {
+            if (!type || type === "none") return null;
+
+            const badgeStyle = {
+                transform: 'translateY(1px)',
+                marginLeft: '-4px'  // Now both badges have same left margin
+            };
+
+            return (
+                <div className="flex items-center" style={badgeStyle} title={type === "oac" ? "Official Artist Channel" : "Verified"}>
+                    {type === "oac" ? (
+                        <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            viewBox="0 0 12 12" 
+                            width="14"    // Made smaller
+                            height="14"   // Made smaller
+                            fill="white"  // Changed to white
+                        >
+                            <g>
+                                <path 
+                                    d="M10.334 4.205a1.8 1.8 0 010 3.59 1.8 1.8 0 01-2.539 2.54 1.8 1.8 0 01-3.59-.001 1.8 1.8 0 01-2.538-2.539 1.8 1.8 0 010-3.59 1.8 1.8 0 012.538-2.539 1.8 1.8 0 013.59 0 1.8 1.8 0 012.539 2.539ZM6 3v2.668A1.75 1.75 0 107 7.25V4h1V3H6Z"
+                                    fillRule="evenodd"
+                                    clipRule="evenodd"
+                                />
+                            </g>
+                        </svg>
+                    ) : (
+                        <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            viewBox="0 0 24 24" 
+                            width="14"    // Made smaller
+                            height="14"   // Made smaller
+                            fill="white"  // Changed to white
+                        >
+                            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zM9.8 17.3l-4.2-4.1L7 11.8l2.8 2.7L17 7.4l1.4 1.4-8.6 8.5z" />
+                        </svg>
+                    )}
+                </div>
+            );
+        };
+
+        const ChannelInfo = ({ channel, redirectUrl, onChannelClick }) => {
+            const [profileImageLoaded, setProfileImageLoaded] = useState(false);
+            const [bannerImageLoaded, setBannerImageLoaded] = useState(false);
+            
+            React.useEffect(() => {
+                setProfileImageLoaded(false);
+                setBannerImageLoaded(false);
+            }, [channel?.user_id]);
+
+            if (!channel) return null;
+            
+            const channelUrl = `https://youtube.com/channel/${channel.user_id}`;
+            const isSynced = channel.profile_picture?.startsWith('ytc/');
+            
+            const handleCopyChannelId = async () => {
+                try {
+                    await navigator.clipboard.writeText(channel.user_id);
+                    const el = document.querySelector('.channel-id');
+                    const originalText = el.textContent;
+                    el.textContent = 'Copied!';
+                    setTimeout(() => el.textContent = originalText, 300);
+                } catch (err) {
+                    console.error('Failed to copy:', err);
+                }
+            };
+
+            const formatUTCDateTime = (timestamp) => {
+                const date = new Date(timestamp * 1000);
+                return `${String(date.getUTCDate()).padStart(2, '0')}/${String(date.getUTCMonth() + 1).padStart(2, '0')}/${date.getUTCFullYear()} ${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}:${String(date.getUTCSeconds()).padStart(2, '0')}`;
+            };
+            
+            return (
+                <div className="card">
+                    <div className="channel-header">
+                        <div className="channel-id" 
+                            onClick={handleCopyChannelId}
+                            title="Click to copy">
+                            {channel.user_id}
+                        </div>
+                        <div className="channel-main">
+                            {channel.profile_picture && (
+                                <div className={`profile-image ${!profileImageLoaded ? 'image-loading' : ''}`}>
+                                    <img 
+                                        src={`https://external-content.duckduckgo.com/iu/?u=https://yt3.googleusercontent.com/${channel.profile_picture}`} 
+                                        alt={channel.display_name} 
+                                        className="profile-image"
+                                        style={{ opacity: profileImageLoaded ? 1 : 0 }}
+                                        onLoad={() => setProfileImageLoaded(true)}
+                                    />
+                                </div>
+                            )}
+                            <div className="channel-titles">
+                                <div className="name-and-sync">
+                                    <h2 className="channel-name">{channel.display_name}</h2>
+                                    <VerificationBadge type={channel.verification?.toLowerCase()} />
+                                    {isSynced && (
+                                        <span className="sync-badge" title="Channel is synced">
+                                        Synced
+                                        </span>
+                                    )}
+                                    </div>
+                                <div className="channel-meta">
+                                    {channel.handle && (
+                                        <span className="channel-handle">@{channel.handle}</span>
+                                    )}
+                                    {channel.country && <span className="channel-location">{channel.country}</span>}
+                                    <div className="meta-with-button">
+                                        <span>{formatUTCDateTime(channel.created_at)}</span>
+                                        <button 
+                                            className="icon-button"
+                                            onClick={() => window.open(`https://youtube.com/channel/${channel.user_id}`, '_blank')}
+                                            title="Open in YouTube"
+                                            style={{ padding: '2px' }}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                                                <polyline points="15 3 21 3 21 9"/>
+                                                <line x1="10" y1="14" x2="21" y2="3"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="channel-stats">
+                                    <span>{formatSubscriberCount(channel.subscriber_count)} subscribers</span>
+                                    <span>{channel.video_count.toLocaleString()} videos</span>
+                                    <span>{channel.view_count.toLocaleString()} views</span>
+                                </div>
+                            </div>
+                        </div>
+                        {channel.banner && (
+                            <div className={`channel-banner ${!bannerImageLoaded ? 'image-loading' : ''}`}>
+                                <img 
+                                    src={`https://external-content.duckduckgo.com/iu/?u=https://yt3.googleusercontent.com/${channel.banner}=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj`} 
+                                    alt="Channel banner"
+                                    style={{ opacity: bannerImageLoaded ? 1 : 0 }}
+                                    onLoad={() => setBannerImageLoaded(true)}
+                                />
+                            </div>
+                        )}
+                    </div>
+                    
+                    {(channel.made_for_kids || channel.analytics_account_id || channel.no_index === true || channel.blocked_countries || channel.conditional_redirect || redirectUrl) && (
+                        <div className="channel-metadata" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: '1.5rem' }}>
+                            {redirectUrl && (
+                                <div className="metadata-item" style={{ cursor: 'pointer' }} onClick={() => window.open(redirectUrl, '_blank')} title="Click to open">
+                                    <span className="metadata-label" data-type="url">Channel Redirect</span>
+                                    <span className="metadata-value">
+                                        {redirectUrl.replace(/^https?:\/\/(www\.)?/, '')}
+                                    </span>
+                                </div>
+                            )}
+                            {channel.conditional_redirect && (
+                                <div className="metadata-item" style={{ cursor: 'pointer' }} onClick={() => onChannelClick(channel.conditional_redirect)} title="Click to look up this channel">
+                                    <span className="metadata-label" data-type="redirect">Conditional Redirect</span>
+                                    <span className="metadata-value">
+                                        {channel.conditional_redirect}
+                                    </span>
+                                </div>
+                            )}
+                            {channel.made_for_kids && (
+                                <div className="metadata-item">
+                                    <span className="metadata-label" data-type="kids">Made for Kids</span>
+                                    <span className="metadata-value">Yes</span>
+                                </div>
+                            )}
+                            {channel.analytics_account_id && (
+                                <div className="metadata-item">
+                                    <span className="metadata-label" data-type="analytics">Analytics Account</span>
+                                    <span className="metadata-value">{channel.analytics_account_id}</span>
+                                </div>
+                            )}
+                            {channel.no_index === true && (
+                                <div className="metadata-item">
+                                    <span className="metadata-label" data-type="noindex">No Index</span>
+                                    <span className="metadata-value">Yes</span>
+                                </div>
+                            )}
+                            {channel.blocked_countries && channel.blocked_countries.length > 0 && (
+                                <div className="metadata-item">
+                                    <span className="metadata-label" data-type="blocked">Blocked Countries</span>
+                                    <span className="metadata-value" style={{ wordBreak: 'break-word' }}>
+                                        {channel.blocked_countries.join(', ')}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const VideoList = ({ videos, loading, hasMore, onLoadMore }) => {
+            const containerRef = React.useRef(null);
+            
+            React.useEffect(() => {
+                const observer = new IntersectionObserver(
+                    entries => {
+                        const firstEntry = entries[0];
+                        if (firstEntry.isIntersecting && hasMore && !loading) {
+                            onLoadMore();
+                        }
+                    },
+                    { threshold: 0.1 }
+                );
+
+                const currentContainer = containerRef.current;
+                if (currentContainer) {
+                    observer.observe(currentContainer);
+                }
+
+                return () => {
+                    if (currentContainer) {
+                        observer.unobserve(currentContainer);
+                    }
+                };
+            }, [hasMore, loading, onLoadMore]);
+
+            if (!videos?.length && !loading) return <p>No videos found</p>;
+
+            return (
+                <>
+                    <div className="videos-grid">
+                        {videos.map(video => (
+                            <div key={video.video_id} className="card video-card" onClick={() => window.open(`https://youtube.com/watch?v=${video.video_id}`, '_blank')}>
+                                <img 
+                                    src={`https://i.ytimg.com/vi/${video.video_id}/hqdefault.jpg`}
+                                    alt={video.title}
+                                    className="video-thumbnail"
+                                />
+                                <div className="video-info">
+                                    <h3 className="video-title">{video.title}</h3>
+                                    <p className="video-date">
+                                        {new Date(video.created_at * 1000).toLocaleDateString('en-GB', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: '2-digit'
+                                        })}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    {(loading || hasMore) && (
+                        <div ref={containerRef} className="loading-container">
+                            <div className="loading"></div>
+                        </div>
+                    )}
+                </>
+            );
+        };
+
+        const SubscriptionList = ({ subscriptions, loading, hasMore, onLoadMore, onSubscriptionClick }) => {
+            const containerRef = React.useRef(null);
+            
+            React.useEffect(() => {
+                const observer = new IntersectionObserver(
+                    entries => {
+                        const firstEntry = entries[0];
+                        if (firstEntry.isIntersecting && hasMore && !loading) {
+                            onLoadMore();
+                        }
+                    },
+                    { threshold: 0.1 }
+                );
+
+                const currentContainer = containerRef.current;
+                if (currentContainer) {
+                    observer.observe(currentContainer);
+                }
+
+                return () => {
+                    if (currentContainer) {
+                        observer.unobserve(currentContainer);
+                    }
+                };
+            }, [hasMore, loading, onLoadMore]);
+
+            if (!subscriptions?.length && !loading) return <p>No subscriptions found</p>;
+
+            return (
+                <>
+                    <div className="subscriptions-grid">
+                        {subscriptions.map(sub => (
+                            <div 
+                                key={sub.channel_id} 
+                                className="card subscription-card"
+                                onClick={() => onSubscriptionClick(sub.channel_id)}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                {sub.profile_picture && (
+                                    <img 
+                                        src={`https://external-content.duckduckgo.com/iu/?u=https://yt3.googleusercontent.com/${sub.profile_picture}`} 
+                                        alt={sub.title} 
+                                        className="subscription-image"
+                                    />
+                                )}
+                                <div className="subscription-info">
+                                    <h3 className="subscription-title">{sub.title}</h3>
+                                    <p className="subscription-date">
+                                        {new Date(sub.created_at * 1000).toLocaleDateString('en-GB', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: '2-digit'
+                                        })}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    {(loading || hasMore) && (
+                        <div ref={containerRef} className="loading-container">
+                            <div className="loading"></div>
+                        </div>
+                    )}
+                </>
+            );
+        };
+
+        const YouTubeLookup = () => {
+            const [lookupType, setLookupType] = useState(() => {
+                const params = new URLSearchParams(window.location.search);
+                return params.get('type') || 'HANDLE';
+            });
+            const [channelId, setChannelId] = useState(() => {
+                const params = new URLSearchParams(window.location.search);
+                return params.get('id') || '';
+            });
+            const [loading, setLoading] = useState(false);
+            const [channelData, setChannelData] = useState(null);
+
+            const [videos, setVideos] = useState([]);
+            const [subscriptions, setSubscriptions] = useState([]);
+            const [loadingVideos, setLoadingVideos] = useState(false);
+            const [loadingSubs, setLoadingSubs] = useState(false);
+            const [videosPageToken, setVideosPageToken] = useState(null);
+            const [subsPageToken, setSubsPageToken] = useState(null);
+            const [hasMoreVideos, setHasMoreVideos] = useState(true);
+            const [hasMoreSubs, setHasMoreSubs] = useState(true);
+
+            const [error, setError] = useState('');
+            const [activeTab, setActiveTab] = useState('videos');
+
+            // Handle URL changes, including back/forward navigation
+            // Inside the YouTubeLookup component, modify the useEffect:
+            React.useEffect(() => {
+                const handleLocationChange = () => {
+                    const params = new URLSearchParams(window.location.search);
+                    const typeParam = params.get('type');
+                    const idParam = params.get('id');
+                    
+                    if (typeParam && idParam) {
+                        lookupChannel(idParam, typeParam, true); // true to update form state on back/forward
+                    }
+                };
+
+                window.addEventListener('popstate', handleLocationChange);
+                handleLocationChange();
+
+                return () => window.removeEventListener('popstate', handleLocationChange);
+            }, []);
+
+            // Modify lookupChannel function to accept both type and id overrides
+            const lookupChannel = async (overrideChannelId = null, overrideType = null, updateFormState = true) => {
+                const idToUse = overrideChannelId || channelId;
+                const typeToUse = overrideType || lookupType;
+
+                setLoading(true);
+                setError('');
+                setVideos([]);
+                setSubscriptions([]);
+                setChannelData(null);
+                
+                try {
+                    // Update URL
+                    const url = new URL(window.location);
+                    url.searchParams.set('type', typeToUse);
+                    url.searchParams.set('id', idToUse);
+                    window.history.pushState({}, '', url);
+
+                    const response = await fetch('/api/channel', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            type: typeToUse,
+                            id: idToUse,
+                        }),
+                    });
+                    
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Failed to fetch channel');
+                    }
+
+                    // Only update form state if flag is true
+                    if (updateFormState) {
+                        if (overrideType) setLookupType(overrideType);
+                        if (overrideChannelId) setChannelId(overrideChannelId);
+                    }
+                    
+                    setChannelData(data);
+                    fetchVideos(data.channel.user_id);
+                    fetchSubscriptions(data.channel.user_id);
+                } catch (err) {
+                    setError(err.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const fetchVideos = async (userId, pageToken = null) => {
+                setLoadingVideos(true);
+                try {
+                    const response = await fetch('/api/playlist_items', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            id: `UU${userId.substring(2)}`,
+                            page_token: pageToken
+                        }),
+                    });
+                    
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Failed to fetch videos');
+                    }
+                    
+                    if (pageToken) {
+                        setVideos(prev => [...prev, ...data.items]);
+                    } else {
+                        setVideos(data.items);
+                    }
+                    
+                    setVideosPageToken(data.page_token);
+                    setHasMoreVideos(!!data.page_token);
+                } catch (err) {
+                    console.error('Error fetching videos:', err);
+                } finally {
+                    setLoadingVideos(false);
+                }
+            };
+
+            const fetchSubscriptions = async (userId, pageToken = null) => {
+                setLoadingSubs(true);
+                try {
+                    const response = await fetch('/api/subscriptions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            id: userId,
+                            page_token: pageToken
+                        }),
+                    });
+                    
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Failed to fetch subscriptions');
+                    }
+                    
+                    if (pageToken) {
+                        setSubscriptions(prev => [...prev, ...data.items]);
+                    } else {
+                        setSubscriptions(data.items);
+                    }
+                    
+                    setSubsPageToken(data.page_token);
+                    setHasMoreSubs(!!data.page_token);
+                } catch (err) {
+                    console.error('Error fetching subscriptions:', err);
+                } finally {
+                    setLoadingSubs(false);
+                }
+            };
+
+            return (
+                <div className="container">
+                    <div className="card">
+                        <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+                            YouTube Channel Lookup
+                        </h1>
+                        <div className="lookup-form">
+                            <select 
+                                value={lookupType} 
+                                onChange={(e) => setLookupType(e.target.value)}
+                                style={{ width: '200px' }}
+                            >
+                                <option value="HANDLE">Handle (@)</option>
+                                <option value="CHANNEL_ID">Channel ID</option>
+                                <option value="USERNAME">Username</option>
+                                <option value="CUSTOM_URL">Custom URL</option>
+                                <option value="VANITY">Vanity URL</option>
+                            </select>
+                            <input 
+                                placeholder="Enter channel identifier"
+                                value={channelId}
+                                onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    setChannelId(newValue);
+                                    // Only attempt to switch to channel ID if we're not already in that mode
+                                    if (lookupType !== 'CHANNEL_ID' && /^UC[\w-]{22}$/.test(newValue)) {
+                                        setLookupType('CHANNEL_ID');
+                                    }
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && channelId && !loading) {
+                                        lookupChannel(channelId, lookupType, true);
+                                    }
+                                }}
+                                style={{ flex: 1 }}
+                            />
+                            <button 
+                                className="lookup-button" 
+                                onClick={() => lookupChannel(channelId, lookupType, true)} 
+                                disabled={loading || !channelId}
+                            >
+                                {loading ? <div className="loading"></div> : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <circle cx="11" cy="11" r="8"/>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                                    </svg>
+                                )}
+                            </button>
+                        </div>
+                        {error && <p className="error">{error}</p>}
+                    </div>
+
+                    {channelData && (  // Changed this condition
+                        <>
+                        <ChannelInfo 
+                            channel={channelData.channel}
+                            redirectUrl={channelData.redirect_url}
+                            onChannelClick={(channelId) => lookupChannel(channelId, 'CHANNEL_ID', true)}
+                        />
+                            <div className="tabs">
+                                <div className="tab-list">
+                                    <button 
+                                        className={`tab-button ${activeTab === 'videos' ? 'active' : ''}`}
+                                        onClick={() => setActiveTab('videos')}
+                                    >
+                                        Videos
+                                    </button>
+                                    {subscriptions.length > 0 && (
+                                        <button 
+                                            className={`tab-button ${activeTab === 'subscriptions' ? 'active' : ''}`}
+                                            onClick={() => setActiveTab('subscriptions')}
+                                        >
+                                            Subscriptions
+                                        </button>
+                                    )}
+                                </div>
+                                
+                                {activeTab === 'videos' && (
+                                    <VideoList 
+                                        videos={videos} 
+                                        loading={loadingVideos}
+                                        hasMore={hasMoreVideos}
+                                        onLoadMore={() => channelData?.channel && fetchVideos(channelData.channel.user_id, videosPageToken)}
+                                    />
+                                )}
+
+                                {activeTab === 'subscriptions' && (
+                                    <SubscriptionList 
+                                        subscriptions={subscriptions} 
+                                        loading={loadingSubs}
+                                        hasMore={hasMoreSubs}
+                                        onLoadMore={() => channelData?.channel && fetchSubscriptions(channelData.channel.user_id, subsPageToken)}
+                                        onSubscriptionClick={(channelId) => {
+                                            lookupChannel(channelId, 'CHANNEL_ID', false);
+                                        }}
+                                    />
+                                )}
+                            </div>
+                        </>
+                    )}
+                </div>
+            );
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<YouTubeLookup />);
+    </script>
+</body>
+</html>
