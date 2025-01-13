@@ -246,6 +246,11 @@
             gap: 0.75rem;
         }
 
+        .subscription-card:hover {
+            text-decoration: none;
+            color: inherit;
+        }
+
         .subscription-image {
             width: 36px;
             height: 36px;
@@ -433,6 +438,11 @@
             gap: 1rem;
             align-items: center;
             padding: 0.25rem 0;
+        }
+
+        .metadata-item:hover {
+            text-decoration: none;
+            color: inherit;
         }
 
         .metadata-label {
@@ -764,20 +774,42 @@
                     {(channel.made_for_kids || channel.analytics_account_id || channel.no_index === true || channel.blocked_countries || channel.conditional_redirect || redirectUrl) && (
                         <div className="channel-metadata" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: '1.5rem' }}>
                             {redirectUrl && (
-                                <div className="metadata-item" style={{ cursor: 'pointer' }} onClick={() => window.open(redirectUrl, '_blank')} title="Click to open">
+                                <a 
+                                    href={redirectUrl}
+                                    className="metadata-item"
+                                    onClick={(e) => {
+                                        if (!e.ctrlKey && !e.metaKey && e.button !== 1) {
+                                            e.preventDefault();
+                                            window.open(redirectUrl, '_blank');
+                                        }
+                                    }}
+                                    style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}
+                                    title="Click to open"
+                                >
                                     <span className="metadata-label" data-type="url">Channel Redirect</span>
                                     <span className="metadata-value">
                                         {redirectUrl.replace(/^https?:\/\/(www\.)?/, '')}
                                     </span>
-                                </div>
+                                </a>
                             )}
                             {channel.conditional_redirect && (
-                                <div className="metadata-item" style={{ cursor: 'pointer' }} onClick={() => onChannelClick(channel.conditional_redirect)} title="Click to look up this channel">
+                                <a 
+                                    href={`?type=CHANNEL_ID&id=${channel.conditional_redirect}`}
+                                    className="metadata-item"
+                                    onClick={(e) => {
+                                        if (!e.ctrlKey && !e.metaKey && e.button !== 1) {
+                                            e.preventDefault();
+                                            onChannelClick(channel.conditional_redirect);
+                                        }
+                                    }}
+                                    style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}
+                                    title="Click to look up this channel"
+                                >
                                     <span className="metadata-label" data-type="redirect">Conditional Redirect</span>
                                     <span className="metadata-value">
                                         {channel.conditional_redirect}
                                     </span>
-                                </div>
+                                </a>
                             )}
                             {channel.made_for_kids && (
                                 <div className="metadata-item">
@@ -903,11 +935,18 @@
                 <>
                     <div className="subscriptions-grid">
                         {subscriptions.map(sub => (
-                            <div 
-                                key={sub.channel_id} 
+                            <a 
+                                key={sub.channel_id}
+                                href={`?type=CHANNEL_ID&id=${sub.channel_id}`}
                                 className="card subscription-card"
-                                onClick={() => onSubscriptionClick(sub.channel_id)}
-                                style={{ cursor: 'pointer' }}
+                                onClick={(e) => {
+                                    // Only prevent default for regular clicks
+                                    if (!e.ctrlKey && !e.metaKey && e.button !== 1) {
+                                        e.preventDefault();
+                                        onSubscriptionClick(sub.channel_id);
+                                    }
+                                }}
+                                style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}
                             >
                                 {sub.profile_picture && (
                                     <img 
@@ -926,7 +965,7 @@
                                         })}
                                     </p>
                                 </div>
-                            </div>
+                            </a>
                         ))}
                     </div>
                     {(loading || hasMore) && (
