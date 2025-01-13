@@ -1,7 +1,7 @@
 
 # youtube-lookup
 
-<img src="./static/screenshot_2.png" width="60%" alt="Alt text">
+![Windows of Ken](./static/screenshot_2.png)
 
 ## Description
 
@@ -39,8 +39,8 @@ The frontend & API should be running on `0.0.0.0:3000`
 
 ## More Screenshots
 
-<img src="./static/screenshot_3.png" width="60%" alt="Alt text">
+![Jason Urgo](./static/screenshot_3.png)
 
-<img src="./static/screenshot_1.png" width="60%" alt="Alt text">
+![1](./static/screenshot_1.png)
 
-<img src="./static/screenshot_4.png" width="60%" alt="Alt text">
+![Future Proof](./static/screenshot_4.png)
