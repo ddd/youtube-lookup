@@ -820,6 +820,12 @@
                             </div>
                         )}
                     </div>
+
+                    {channel.description && (
+                        <div className="channel-description" style={{ marginTop: '1.5rem', marginBottom: '1.5rem' }}>
+                            {channel.description}
+                        </div>
+                    )}
                     
                     {(channel.made_for_kids || channel.analytics_account_id || channel.no_index === true || channel.blocked_countries || channel.conditional_redirect || redirectUrl) && (
                         <div className="channel-metadata" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: '1.5rem' }}>
@@ -887,6 +893,16 @@
                                     </span>
                                 </div>
                             )}
+                        </div>
+                    )}
+
+                    {channel.keywords && channel.keywords.length > 0 && (
+                        <div className="channel-tags">
+                            {channel.keywords.map((tag, index) => (
+                                <span key={index} className="channel-tag">
+                                    {tag}
+                                </span>
+                            ))}
                         </div>
                     )}
                 </div>
