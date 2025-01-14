@@ -191,45 +191,123 @@
         /* Video grid and card styles */
         .videos-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, 272px);
+            column-gap: 1rem;
+            row-gap: 2.5rem;
+            padding: 0.5rem;
+            justify-content: start;
+            width: 100%;
+            max-width: 1168px; /* Fits exactly 4 videos (272px * 4 + 16px * 3) */
+            margin: 0 auto;
         }
 
         .video-card {
             padding: 0;
-            overflow: hidden;
-            transition: transform 0.2s;
+            width: 272px;
+            background: transparent;
+            border: none;
+            box-shadow: none;
             cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
         }
 
-        .video-card:hover {
-            transform: translateY(-2px);
+        .video-thumbnail-container {
+            position: relative;
+            width: 272px;
+            height: 153px; /* Maintains 16:9 ratio */
+            border-radius: 12px;
+            overflow: hidden;
+            background: #181818;
+            margin-bottom: 0.75rem;
         }
 
         .video-thumbnail {
             width: 100%;
-            aspect-ratio: 16/9;
+            height: 100%;
             object-fit: cover;
+            transition: transform 0.2s ease;
+        }
+
+        .video-card:hover .video-thumbnail {
+            transform: scale(1.05);
+        }
+
+        .video-duration {
+            position: absolute;
+            bottom: 0.5rem;
+            right: 0.5rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            font-family: "Roboto", sans-serif;
         }
 
         .video-info {
-            padding: 1rem;
+            padding: 0;
         }
 
         .video-title {
             font-size: 0.9rem;
             font-weight: 500;
             margin: 0;
+            margin-bottom: 0.5rem;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            color: #f1f1f1;
+            line-height: 1.4;
+            font-family: "Roboto", sans-serif;
+            position: relative;
         }
 
-        .video-date {
+        .hidden-views-tag {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+            position: relative;
+            top: -1px;
+        }
+
+        .video-metadata {
             font-size: 0.8rem;
-            color: #94a3b8;
-            margin-top: 0.5rem;
+            color: #aaa;
+            font-family: "Roboto", sans-serif;
+        }
+
+        .video-stats {
+            display: flex;
+            align-items: center;
+            color: #aaa;
+            flex-wrap: wrap;
+        }
+
+        .video-stats > span {
+            display: flex;
+            align-items: center;
+        }
+
+        .video-stats > span:not(:last-child) {
+            margin-right: 0.25rem;
+        }
+
+        /* Make the dots slightly smaller and lighter */
+        .video-stats .separator {
+            font-size: 0.6rem;
+            opacity: 0.7;
+            margin: 0 0.25rem;
         }
 
         /* Subscription grid and card styles */
@@ -909,6 +987,7 @@
             );
         };
 
+        // AFTER - Updated Video Card JSX
         const VideoList = ({ videos, loading, hasMore, onLoadMore }) => {
             const containerRef = React.useRef(null);
             
@@ -935,29 +1014,73 @@
                 };
             }, [hasMore, loading, onLoadMore]);
 
+            const formatCount = (count) => {
+                if (!count) return '';
+                if (count >= 1000000000) {
+                    const billions = count / 1000000000;
+                    return `${billions.toFixed(1).replace(/\.0$/, '')}B`;
+                } else if (count >= 1000000) {
+                    const millions = count / 1000000;
+                    return `${millions.toFixed(1).replace(/\.0$/, '')}M`;
+                } else if (count >= 1000) {
+                    const thousands = count / 1000;
+                    return `${thousands.toFixed(1).replace(/\.0$/, '')}K`;
+                }
+                return count.toLocaleString();
+            };
+
+            const formatDate = (timestamp) => {
+                const date = new Date(timestamp * 1000);
+                const now = new Date();
+                const diffTime = Math.abs(now - date);
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays === 0) return 'Today';
+                if (diffDays === 1) return 'Yesterday';
+                if (diffDays < 7) return `${diffDays} days ago`;
+                if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+                if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+                return `${Math.floor(diffDays / 365)} years ago`;
+            };
+
             if (!videos?.length && !loading) return <p>No videos found</p>;
 
             return (
                 <>
                     <div className="videos-grid">
                         {videos.map(video => (
-                            <div key={video.video_id} className="card video-card" onClick={() => window.open(`https://youtube.com/watch?v=${video.video_id}`, '_blank')}>
-                                <img 
-                                    src={`https://i.ytimg.com/vi/${video.video_id}/hqdefault.jpg`}
-                                    alt={video.title}
-                                    className="video-thumbnail"
-                                />
-                                <div className="video-info">
-                                    <h3 className="video-title">{video.title}</h3>
-                                    <p className="video-date">
-                                        {new Date(video.created_at * 1000).toLocaleDateString('en-GB', {
-                                            day: '2-digit',
-                                            month: '2-digit',
-                                            year: '2-digit'
-                                        })}
-                                    </p>
+                            <a 
+                                key={video.video_id} 
+                                href={`https://youtube.com/watch?v=${video.video_id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="video-card"
+                            >
+                                <div className="video-thumbnail-container">
+                                    <img 
+                                        src={`https://i.ytimg.com/vi/${video.video_id}/hqdefault.jpg`}
+                                        alt={video.title}
+                                        className="video-thumbnail"
+                                    />
                                 </div>
-                            </div>
+                                <div className="video-info">
+                                    <h3 className="video-title">
+                                        {video.title}
+                                        {video.views === null && !video.livestream && (
+                                            <span className="hidden-views-tag">Hidden</span>
+                                        )}
+                                    </h3>
+                                    <div className="video-metadata">
+                                        <div className="video-stats">
+                                            <span>{video.views === 0 ? 'No views' : video.views ? `${formatCount(video.views)} views` : ''}</span>
+                                            {video.views !== null && <span className="separator">•</span>}
+                                            <span>{formatDate(video.created_at)}</span>
+                                            {video.comments > 0 && <span className="separator">•</span>}
+                                            {video.comments > 0 && <span>{formatCount(video.comments)}</span>}
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
                         ))}
                     </div>
                     {(loading || hasMore) && (
@@ -1128,6 +1251,12 @@
                     
                     setChannelData(data);
                     fetchVideos(data.channel.user_id);
+
+                    // Reset to videos tab if we're on subscriptions and there are no subscriptions
+                    if (activeTab === 'subscriptions') {
+                        setActiveTab('videos');
+                    }   
+
                     fetchSubscriptions(data.channel.user_id);
                 } catch (err) {
                     setError(err.message);
@@ -1139,7 +1268,7 @@
             const fetchVideos = async (userId, pageToken = null) => {
                 setLoadingVideos(true);
                 try {
-                    const response = await fetch('/api/playlist_items', {
+                    const response = await fetch('/api/videos', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1228,21 +1357,34 @@
                                 onChange={(e) => {
                                     const newValue = e.target.value;
                                     setChannelId(newValue);
-                                    // Only attempt to switch to channel ID if we're not already in that mode
+                                    
+                                    // Handle auto-switching of types
                                     if (lookupType !== 'CHANNEL_ID' && /^UC[\w-]{22}$/.test(newValue)) {
                                         setLookupType('CHANNEL_ID');
+                                    } else if (lookupType !== 'HANDLE' && /^@/.test(newValue)) {
+                                        setLookupType('HANDLE');
+                                    } else if (lookupType !== 'CUSTOM_URL' && /^\+/.test(newValue)) {
+                                        setLookupType('CUSTOM_URL');
+                                    } else if (lookupType === 'CHANNEL_ID' && !newValue.startsWith('UC')) {
+                                        // New condition: If in channel ID mode and input doesn't start with UC,
+                                        // switch to handle mode and prepend @
+                                        setLookupType('HANDLE');
+                                        if (!newValue.startsWith('@')) {
+                                            setChannelId(`@${newValue}`);
+                                        }
                                     }
                                 }}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter' && channelId && !loading) {
-                                        lookupChannel(channelId, lookupType, true);
+                                        const processedId = channelId.replace(/^[@+]/, '');
+                                        lookupChannel(processedId, lookupType, true);
                                     }
                                 }}
                                 style={{ flex: 1 }}
                             />
                             <button 
                                 className="lookup-button" 
-                                onClick={() => lookupChannel(channelId, lookupType, true)} 
+                                onClick={() => lookupChannel(channelId.replace(/^[@+]/, ''), lookupType, true)} 
                                 disabled={loading || !channelId}
                             >
                                 {loading ? <div className="loading"></div> : (

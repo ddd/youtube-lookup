@@ -7,7 +7,7 @@ use axum::{
 };
 use std::env;
 use std::sync::Arc;
-use crate::youtube::{channels::{get_channel, LookupType as YTLookupType}, playlist_items::get_playlist_items, subscriptions::get_subscriptions};
+use crate::youtube::{channels::{get_channel, LookupType as YTLookupType}, playlist_items::get_playlist_items, subscriptions::get_subscriptions, videos::populate_video_stats};
 use crate::youtubei::{resolve_url::{resolve_url, ResolveUrlResult}, browse::enrich_channel_data};
 use super::types::{AppState, ChannelLookupRequest, ChannelLookupResponse, LookupType, PaginatedRequest, PlaylistItemsResponse, SubscriptionsResponse};
 use super::error::ApiError;
@@ -232,19 +232,28 @@ async fn channel_handler(
     }))
 }
 
-async fn playlist_items_handler(
+async fn videos_handler(
     State(state): State<Arc<AppState>>,
     payload: Result<Json<PaginatedRequest>, axum::extract::rejection::JsonRejection>,
 ) -> Result<Json<PlaylistItemsResponse>, ApiError> {
     let Json(payload) = payload.map_err(|e| ApiError::InvalidRequest(e.to_string()))?;
 
     let api_key = get_api_key();
-    let (items, page_token) = get_playlist_items(
+    
+    // First get playlist items
+    let (mut items, page_token) = get_playlist_items(
         &state.client,
         &payload.id,
         &api_key,
         payload.page_token.as_deref(),
         MAX_RESULTS,
+    ).await?;
+
+    // Then populate with video stats
+    populate_video_stats(
+        &state.client,
+        &mut items,
+        &api_key,
     ).await?;
 
     Ok(Json(PlaylistItemsResponse {
@@ -285,7 +294,7 @@ pub fn create_router() -> Router {
 
     Router::new()
         .route("/", get(index_handler))  // Add this line for serving the HTML
-        .route("/api/playlist_items", post(playlist_items_handler))
+        .route("/api/videos", post(videos_handler))
         .route("/api/subscriptions", post(subscriptions_handler))
         .route("/api/channel", post(channel_handler))
         .with_state(state)
